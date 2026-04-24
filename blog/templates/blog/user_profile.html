@@ -1,0 +1,179 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Profile</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { 
+            font-family: 'Segoe UI', sans-serif; 
+            background: linear-gradient(135deg, #FFFBF7 0%, #FFF5E6 100%);
+            min-height: 100vh;
+        }
+
+        .profile-box {
+            text-align: center;
+            padding: 30px 20px;
+            background: white;
+            margin: 20px auto;
+            max-width: 600px;
+            border-radius: 15px;
+            border: 2px solid #FFD9B3;
+            box-shadow: 0 8px 24px rgba(255, 179, 102, 0.15);
+        }
+
+        .profile-box img {
+            border: 4px solid #FFB366;
+            border-radius: 50%;
+            width: 120px;
+            height: 120px;
+            margin-bottom: 15px;
+        }
+
+        h2 {
+            color: #332211;
+            font-size: 24px;
+            margin: 10px 0;
+        }
+
+        p {
+            color: #77553A;
+            font-size: 15px;
+            margin: 10px 0;
+        }
+
+        .stats {
+            display: flex;
+            justify-content: space-around;
+            margin: 20px 0;
+            padding: 20px 0;
+            border-top: 2px solid #FFD9B3;
+            border-bottom: 2px solid #FFD9B3;
+        }
+
+        .stats strong {
+            font-size: 18px;
+            color: #FFB366;
+            display: block;
+        }
+
+        .post-card {
+            background: white;
+            margin: 15px 0;
+            padding: 15px;
+            border-radius: 10px;
+            border: 2px solid #FFD9B3;
+            box-shadow: 0 4px 12px rgba(255, 179, 102, 0.1);
+            transition: transform 0.3s ease;
+            max-width: 600px;
+            margin-left: auto;
+            margin-right: auto;
+        }
+
+        .post-card:hover {
+            transform: translateY(-2px);
+        }
+
+        .post-card img {
+            width: 100%;
+            border-radius: 8px;
+            margin-bottom: 10px;
+            border: none;
+        }
+
+        .counts {
+            display: flex;
+            gap: 15px;
+            margin-top: 10px;
+            font-size: 14px;
+            color: #77553A;
+            font-weight: 600;
+        }
+
+        .likes-users {
+            font-size: 13px;
+            color: #77553A;
+            margin-top: 10px;
+            padding-top: 10px;
+            border-top: 1px solid #FFE6CC;
+        }
+
+        :target {
+            border: 2px solid #FFB366 !important;
+        }
+    </style>
+</head>
+
+<body>
+
+<div class="profile-box">
+    <img src="{{ profile.profile_pic.url }}" alt="Profile">
+    <h2>{{ profile_user.username }}</h2>
+    <p>{{ profile.bio }}</p>
+
+    <p>
+        <strong>{{ posts|length }}</strong> Posts • 
+        <strong>{{ followers }}</strong> Followers • 
+        <strong>{{ following }}</strong> Following
+    </p>
+
+    <div class="highlights" style="margin-top:12px; padding:10px; background:#FFF8ED; border:1px solid #FFDFC2; border-radius:10px; text-align:left;">
+        <strong>Highlights</strong>
+        <div id="userProfileHighlights" style="margin-top:6px;">
+            {% if highlighted_stories %}
+                {% for story in highlighted_stories %}
+                    <span style="display:inline-block;margin:4px 4px;padding:6px 10px;border-radius:999px;background:#FFE6CC;font-size:12px;">{{ story.title }}</span>
+                {% endfor %}
+            {% else %}
+                <em style="color:#77553A;">No highlights yet.</em>
+            {% endif %}
+        </div>
+    </div>
+</div>
+
+<div style="max-width:600px;margin:0 auto;padding:20px;">
+
+{% for post in posts %}
+<div id="post-{{ post.id }}" class="post-card">
+
+    {% if post.image %}
+        <img src="{{ post.image.url }}" alt="Post">
+    {% endif %}
+
+    <p><strong>{{ post.caption }}</strong></p>
+
+    <!-- COUNTS -->
+    <div class="counts">
+        <span>❤️ {{ post.like_set.count }}</span>
+        <span>💬 {{ post.comment_set.count }}</span>
+        <span>📤 {{ post.message_set.count }}</span>
+    </div>
+
+    <!-- WHO LIKED -->
+    <div class="likes-users">
+        {% for like in post.like_set.all %}
+            <strong>{{ like.user.username }}</strong>{% if not forloop.last %}, {% endif %}
+        {% empty %}
+            <em>No likes yet</em>
+        {% endfor %}
+    </div>
+
+    <!-- COMMENTS -->
+    <div style="margin-top:10px;">
+        {% for comment in post.comment_set.all|slice:":2" %}
+            <p><strong>{{ comment.user.username }}:</strong> {{ comment.text }}</p>
+        {% empty %}
+            <p style="color:#B5A490; font-style:italic;">No comments yet</p>
+        {% endfor %}
+
+        {% if post.comment_set.count > 2 %}
+            <p style="color:#FFB366; font-weight:600; cursor:pointer;">View all {{ post.comment_set.count }} comments</p>
+        {% endif %}
+    </div>
+
+</div>
+{% endfor %}
+
+</div>
+
+</body>
+</html>

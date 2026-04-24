@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Reels</title>
+    <style>
+        body { font-family:'DM Sans',sans-serif; background:#FFFBF7; color:#332211; }
+        .container{max-width:900px;margin:20px auto;padding:12px;}
+        h1{margin-bottom:14px;}
+        .grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(250px,1fr));gap:14px;}
+        .reel{background:#fff;border:1px solid #FFE6CC;border-radius:14px;padding:10px;box-shadow:0 5px 14px rgba(255,153,51,.12);}
+        .reel video{width:100%;border-radius:10px;}
+        .meta{margin-top:8px;font-size:13px;color:#77553A;}
+        .btn{display:inline-block;margin-top:12px;text-decoration:none;background:linear-gradient(135deg,#7CB9E8,#5A9FD4);color:#fff;padding:8px 14px;border-radius:10px;}
+    </style>
+</head>
+<body>
+<div class="container">
+    <h1>FLICKER Reels</h1>
+    <a class="btn" href="{% url 'create_reel' %}">＋ Create Reel</a>
+    <a class="btn" href="{% url 'feed' %}" style="background:linear-gradient(135deg,#FFB366,#FF9933);">← Back to Feed</a>
+
+    <div class="grid">
+        {% for reel in reels %}
+            <div class="reel">
+                <video controls>
+                    <source src="{{ reel.video.url }}" type="video/mp4">
+                    Your browser does not support video.
+                </video>
+                <div class="meta">{{ reel.author.username }} • {{ reel.created_at|date:'M d, Y H:i' }}</div>
+                <div class="meta">{{ reel.caption }}</div>
+            </div>
+        {% empty %}
+            <p style="grid-column:1/-1; color:#77553A;">No reels yet. Create one to get started.</p>
+        {% endfor %}
+    </div>
+</div>
+</body>
+</html>

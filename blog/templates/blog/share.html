@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Share Post</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { 
+            font-family: 'Segoe UI', sans-serif;
+            background: linear-gradient(135deg, #FFFBF7 0%, #FFF5E6 100%);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .share-container {
+            background: white;
+            padding: 30px;
+            border-radius: 15px;
+            box-shadow: 0 8px 24px rgba(255, 179, 102, 0.15);
+            max-width: 400px;
+            width: 100%;
+            border: 2px solid #FFD9B3;
+        }
+
+        h3 {
+            color: #332211;
+            font-size: 22px;
+            margin-bottom: 20px;
+            text-align: center;
+        }
+
+        .users-list {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        form {
+            display: contents;
+        }
+
+        button {
+            width: 100%;
+            padding: 12px;
+            margin: 5px 0;
+            border: none;
+            background: linear-gradient(135deg, #FFB366 0%, #FF9933 100%);
+            color: white;
+            border-radius: 8px;
+            font-weight: 600;
+            font-size: 14px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 2px 8px rgba(255, 179, 102, 0.2);
+        }
+
+        button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(255, 179, 102, 0.3);
+        }
+
+        button:active {
+            transform: translateY(0);
+        }
+
+        .empty-state {
+            text-align: center;
+            padding: 20px;
+            color: #77553A;
+        }
+    </style>
+</head>
+
+<body>
+
+<div class="share-container">
+    <h3>📤 Share Post</h3>
+
+    {% if users %}
+        <div class="users-list">
+        {% for user in users %}
+            <form method="POST">
+                {% csrf_token %}
+                <input type="hidden" name="receiver" value="{{ user.id }}">
+                <button type="submit">
+                    📨 Send to {{ user.username }}
+                </button>
+            </form>
+        {% endfor %}
+        </div>
+    {% else %}
+        <div class="empty-state">
+            <p>No users to share with</p>
+        </div>
+    {% endif %}
+</div>
+
+</body>
+</html>

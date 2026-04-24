@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Create Post</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { 
+            font-family: 'Segoe UI', sans-serif; 
+            background: linear-gradient(135deg, #FFFBF7 0%, #FFF5E6 100%); 
+            display: flex; 
+            justify-content: center; 
+            align-items: center; 
+            min-height: 100vh;
+            padding: 20px;
+        }
+        .card { 
+            background: white; 
+            padding: 30px; 
+            border-radius: 15px; 
+            box-shadow: 0 8px 24px rgba(255, 179, 102, 0.15);
+            max-width: 500px; 
+            width: 100%;
+            border: 2px solid #FFD9B3;
+        }
+        h2 { 
+            margin-bottom: 20px; 
+            color: #332211;
+            font-size: 24px;
+        }
+        form { display: flex; flex-direction: column; }
+        input[type="text"], textarea, input[type="file"] { 
+            padding: 12px; 
+            margin: 10px 0; 
+            border: 2px solid #FFD9B3; 
+            border-radius: 8px; 
+            font-family: 'Segoe UI', sans-serif;
+            font-size: 14px;
+            transition: border-color 0.3s ease;
+        }
+        input[type="text"]:focus, textarea:focus, input[type="file"]:focus { 
+            outline: none;
+            border-color: #FFB366;
+            box-shadow: 0 0 0 3px rgba(255, 179, 102, 0.1);
+        }
+        textarea { 
+            resize: vertical; 
+            min-height: 120px; 
+        }
+        label { 
+            font-weight: bold; 
+            margin-top: 10px;
+            color: #332211;
+        }
+        .btn { 
+            background: linear-gradient(135deg, #FFB366 0%, #FF9933 100%); 
+            color: white; 
+            padding: 12px; 
+            border: none; 
+            border-radius: 8px; 
+            cursor: pointer; 
+            font-size: 16px; 
+            margin-top: 15px;
+            font-weight: bold;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 12px rgba(255, 179, 102, 0.3);
+        }
+        .btn:hover { 
+            transform: translateY(-2px);
+            box-shadow: 0 6px 16px rgba(255, 179, 102, 0.4);
+        }
+        .btn:active {
+            transform: translateY(0);
+        }
+        a { 
+            color: #FFB366; 
+            text-decoration: none; 
+            margin-top: 15px;
+            font-weight: 600;
+            transition: color 0.3s ease;
+        }
+        a:hover { 
+            color: #FF9933;
+        }
+    </style>
+</head>
+<body>
+
+<div class="card">
+    <h2>✍️ Create a New Post</h2>
+
+    <form method="POST" enctype="multipart/form-data">
+        {% csrf_token %}
+        {{ form.as_p }}
+        <button type="submit" class="btn">📤 Share Post</button>
+    </form>
+
+    <a href="{% url 'feed' %}">← Back to Feed</a>
+</div>
+
+</body>
+</html>

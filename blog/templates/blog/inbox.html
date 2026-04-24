@@ -1,0 +1,123 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Messages</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { 
+            font-family: 'Segoe UI', sans-serif;
+            background: linear-gradient(135deg, #FFFBF7 0%, #FFF5E6 100%);
+            min-height: 100vh;
+        }
+
+        .inbox-container {
+            max-width: 600px;
+            margin: 30px auto;
+            background: white;
+            border-radius: 15px;
+            border: 2px solid #FFD9B3;
+            box-shadow: 0 8px 24px rgba(255, 179, 102, 0.15);
+            padding: 0;
+            overflow: hidden;
+        }
+
+        .inbox-header {
+            padding: 20px;
+            background: linear-gradient(135deg, #FFB366 0%, #FF9933 100%);
+            color: white;
+            border-bottom: 2px solid #FF9933;
+        }
+
+        .inbox-header h2 {
+            font-size: 22px;
+            font-weight: 600;
+        }
+
+        .user-list {
+            list-style: none;
+            padding: 0;
+        }
+
+        .user-item {
+            padding: 15px 20px;
+            border-bottom: 1px solid #FFE6CC;
+            transition: all 0.3s ease;
+        }
+
+        .user-item:hover {
+            background: #FFF5E6;
+        }
+
+        .user-item:last-child {
+            border-bottom: none;
+        }
+
+        .user-item a {
+            text-decoration: none;
+            color: #332211;
+            font-weight: 600;
+            font-size: 16px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            transition: color 0.3s ease;
+        }
+
+        .user-item a:hover {
+            color: #FFB366;
+        }
+
+        .user-avatar {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #FFB366, #FF9933);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: 700;
+            font-size: 18px;
+            flex-shrink: 0;
+        }
+
+        .empty-state {
+            padding: 60px 20px;
+            text-align: center;
+            color: #77553A;
+        }
+
+        .empty-state p {
+            font-size: 16px;
+            margin-bottom: 10px;
+        }
+    </style>
+</head>
+<body>
+
+<div class="inbox-container">
+    <div class="inbox-header">
+        <h2>💬 Messages</h2>
+    </div>
+
+    {% if users %}
+        <ul class="user-list">
+        {% for user in users %}
+            <li class="user-item">
+                <a href="{% url 'chat' user.id %}">
+                    <div class="user-avatar">{{ user.username|first|upper }}</div>
+                    {{ user.username }}
+                </a>
+            </li>
+        {% endfor %}
+        </ul>
+    {% else %}
+        <div class="empty-state">
+            <p>📭 No messages yet</p>
+            <p style="font-size:14px;">Start a conversation with someone!</p>
+        </div>
+    {% endif %}
+</div>
+
+</body>
+</html>

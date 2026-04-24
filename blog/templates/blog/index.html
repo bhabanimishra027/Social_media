@@ -1,0 +1,1282 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <title>InstaBlog — Feed</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@500;700&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+    <style>
+        /* ─── RESET & VARIABLES ─── */
+        *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+
+        :root {
+            --bg:           #FFFBF7;
+            --surface:      #ffffff;
+            --surface-alt:  #FFF5E6;
+            --border:       #FFD9B3;
+            --ink:          #332211;
+            --ink-muted:    #77553A;
+            --ink-faint:    #B5A490;
+            --accent:       #FFB366;
+            --accent-light: #FFE6CC;
+            --accent-hover: #FF9933;
+            --blue:         #7CB9E8;
+            --blue-light:   #E8F5FF;
+            --blue-hover:   #5A9FD4;
+            --red-soft:     #FF6B6B;
+            --shadow-sm:    0 2px 8px rgba(255,179,102,.08);
+            --shadow-md:    0 8px 24px rgba(255,179,102,.14);
+            --shadow-lg:    0 20px 50px rgba(255,179,102,.18);
+            --radius:       18px;
+            --radius-sm:    10px;
+            --transition:   .24s cubic-bezier(.4,0,.2,1);
+        }
+
+        html { scroll-behavior: smooth; }
+
+        body {
+            font-family: 'DM Sans', sans-serif;
+            background: var(--bg);
+            color: var(--ink);
+            min-height: 100vh;
+            -webkit-font-smoothing: antialiased;
+        }
+
+        /* ─── APP SHELL ─── */
+        .app-shell {
+            min-height: 100vh;
+            display: grid;
+            grid-template-columns: 250px 1fr;
+            gap: 20px;
+            padding: 16px;
+        }
+
+        .sidebar {
+            background: rgba(255,255,255,0.84);
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+            box-shadow: var(--shadow-md);
+            backdrop-filter: blur(14px);
+            padding: 20px 12px 18px 12px;
+            position: sticky;
+            top: 16px;
+            align-self: start;
+            height: calc(100vh - 40px);
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+        }
+
+        .logo-area {
+            font-family: 'Playfair Display', serif;
+            font-weight: 700;
+            color: var(--ink);
+            font-size: 22px;
+            margin-bottom: 24px;
+            text-align: center;
+            letter-spacing: -0.6px;
+        }
+
+        .nav-list {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            margin-bottom: 10px;
+        }
+
+        .nav-item {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 10px 12px;
+            border-radius: 12px;
+            color: var(--ink-muted);
+            font-weight: 600;
+            text-decoration: none;
+            transition: background var(--transition), color var(--transition), transform var(--transition);
+        }
+
+        .nav-item:hover {
+            background: var(--blue-light);
+            color: var(--blue-hover);
+            transform: translateX(2px);
+        }
+
+        .nav-item.active {
+            background: var(--accent-light);
+            color: var(--accent-hover);
+        }
+
+        .badge {
+            background: var(--red-soft);
+            color: white;
+            min-width: 20px;
+            padding: 2px 6px;
+            border-radius: 999px;
+            font-size: 12px;
+            text-align: center;
+        }
+
+        .main-content {
+            display: flex;
+            flex-direction: column;
+            gap: 14px;
+            padding-right: 8px;
+        }
+
+        .top-controls {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 10px;
+            border-radius: var(--radius-sm);
+            background: var(--surface);
+            border: 1px solid var(--border);
+            padding: 12px 14px;
+            box-shadow: var(--shadow-sm);
+        }
+
+        .search-input {
+            width: 100%;
+            min-width: 170px;
+            max-width: 420px;
+            background: var(--accent-light);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 9px 14px;
+            font-size: 14px;
+            color: var(--ink);
+            outline: none;
+        }
+
+        .story-row {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            overflow-x: auto;
+            padding: 10px 0;
+            border-bottom: 1px solid var(--border);
+        }
+
+        .story-item {
+            flex: 0 0 auto;
+            width: 86px;
+            text-align: center;
+        }
+
+        .story-link { text-decoration:none; color:inherit; display:block; }
+        .story-thumb {
+            width: 60px;
+            height: 60px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto 8px;
+            background: linear-gradient(135deg, var(--accent), var(--blue));
+            color: white;
+            font-weight: 700;
+            border: 3px solid var(--surface);
+            box-shadow: 0 4px 8px rgba(51,34,17,.14);
+        }
+
+        .story-name {
+            font-size: 12px;
+            color: var(--ink);
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .story-add {
+            display: inline-flex;
+            margin-top: 4px;
+            font-size: 10px;
+            align-items: center;
+            justify-content: center;
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: 999px;
+            padding: 3px 6px;
+            cursor: pointer;
+            color: var(--ink-muted);
+            transition: all var(--transition);
+        }
+
+        .story-add.active {
+            color: #fff;
+            background: var(--accent);
+            border-color: var(--accent);
+        }
+
+        .highlights {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: var(--radius-sm);
+            padding: 12px;
+            box-shadow: var(--shadow-sm);
+            margin-top: 12px;
+        }
+
+        .highlight-chip {
+            display: inline-flex;
+            border-radius: 999px;
+            background: var(--accent-light);
+            color: var(--accent-hover);
+            font-size: 12px;
+            padding: 6px 10px;
+            margin: 3px;
+        }
+
+        .floating-chat-btn {
+            position: fixed;
+            right: 18px;
+            bottom: 18px;
+            width: 54px;
+            height: 54px;
+            border-radius: 50%;
+            border: none;
+            background: linear-gradient(135deg, var(--accent), var(--accent-hover));
+            color: white;
+            font-size: 22px;
+            box-shadow: var(--shadow-lg);
+            cursor: pointer;
+            z-index: 300;
+            display: grid;
+            place-items: center;
+        }
+
+        .chat-panel {
+            position: fixed;
+            right: 18px;
+            bottom: 86px;
+            width: min(350px, calc(100vw - 36px));
+            max-height: 420px;
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: 16px;
+            box-shadow: var(--shadow-lg);
+            overflow: hidden;
+            transform: translateY(12px);
+            opacity: 0;
+            pointer-events: none;
+            transition: transform var(--transition), opacity var(--transition);
+        }
+
+        .chat-panel.open {
+            opacity: 1;
+            pointer-events: auto;
+            transform: translateY(0);
+        }
+
+        .chat-panel h4 {
+            margin: 0;
+            padding: 10px;
+            background: var(--blue-light);
+            color: var(--blue-hover);
+            font-size: 14px;
+            font-weight: 700;
+        }
+
+        .chat-panel .chat-body {
+            padding: 10px;
+            max-height: 310px;
+            overflow-y: auto;
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        .chat-panel .chat-body p {
+            margin:0;
+            font-size: 13px;
+            padding: 7px 9px;
+            border-radius: 10px;
+            background: var(--accent-light);
+        }
+
+        .chat-panel .chat-controls {
+            display: flex;
+            gap: 8px;
+            padding: 10px;
+            border-top: 1px solid var(--border);
+        }
+
+        .chat-panel input { flex: 1; padding: 8px 10px; border-radius: 10px; border: 1px solid var(--border); }
+
+        .chat-panel button {
+            border: none;
+            background: var(--blue);
+            color: white;
+            padding: 8px 12px;
+            border-radius: 10px;
+            cursor: pointer;
+        }
+
+        /* ─── FEED ─── */
+        .feed {
+            max-width: 560px;
+            margin: 36px auto 72px;
+            padding: 0 16px;
+            display: flex;
+            flex-direction: column;
+            gap: 28px;
+        }
+
+        /* ─── POST CARD ─── */
+        .post-card {
+            background: var(--surface);
+            border-radius: var(--radius);
+            border: 1.5px solid var(--border);
+            box-shadow: var(--shadow-sm);
+            overflow: hidden;
+            transition: box-shadow var(--transition), transform var(--transition), border-color var(--transition);
+            animation: cardReveal .5s ease both;
+        }
+
+        @keyframes cardReveal {
+            from { opacity: 0; transform: translateY(22px) scale(.98); }
+            to   { opacity: 1; transform: translateY(0) scale(1); }
+        }
+
+        .post-card:hover {
+            box-shadow: var(--shadow-lg);
+            transform: translateY(-4px);
+            border-color: var(--accent);
+        }
+
+        .post-card:nth-child(1) { animation-delay: .04s; }
+        .post-card:nth-child(2) { animation-delay: .11s; }
+        .post-card:nth-child(3) { animation-delay: .18s; }
+        .post-card:nth-child(4) { animation-delay: .25s; }
+        .post-card:nth-child(5) { animation-delay: .32s; }
+
+        /* ─── POST HEADER ─── */
+        .post-header {
+            padding: 16px 18px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            background: linear-gradient(to right, #fff, #fffaf4);
+            border-bottom: 1px solid var(--border);
+        }
+
+        .author-info { display: flex; align-items: center; gap: 12px; }
+
+        .avatar {
+            width: 42px; height: 42px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, var(--accent-light), var(--blue-light));
+            display: flex; align-items: center; justify-content: center;
+            font-weight: 700;
+            font-size: 14px;
+            color: var(--accent-hover);
+            flex-shrink: 0;
+            border: 2.5px solid var(--accent);
+            box-shadow: 0 2px 8px rgba(255,179,102,.2);
+            transition: transform var(--transition), box-shadow var(--transition);
+        }
+
+        .avatar:hover {
+            transform: scale(1.08);
+            box-shadow: 0 4px 14px rgba(255,179,102,.3);
+        }
+
+        .author-meta { display: flex; flex-direction: column; gap: 2px; }
+
+        .author-name {
+            font-weight: 700;
+            font-size: 14.5px;
+            color: var(--ink);
+            text-decoration: none;
+            transition: color var(--transition);
+        }
+
+        .author-name:hover { color: var(--accent-hover); }
+
+        .post-date {
+            font-size: 11.5px;
+            color: var(--ink-faint);
+            font-weight: 400;
+            display: flex;
+            align-items: center;
+            gap: 4px;
+        }
+
+        /* ─── FOLLOW BUTTONS ─── */
+        .btn-follow, .btn-unfollow {
+            padding: 6px 16px;
+            border-radius: 20px;
+            font-size: 12.5px;
+            font-weight: 700;
+            text-decoration: none;
+            transition: all var(--transition);
+            white-space: nowrap;
+            letter-spacing: .2px;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .btn-follow::before, .btn-unfollow::before {
+            content: '';
+            position: absolute;
+            inset: 0;
+            background: rgba(255,255,255,.18);
+            opacity: 0;
+            transition: opacity var(--transition);
+        }
+
+        .btn-follow:hover::before, .btn-unfollow:hover::before { opacity: 1; }
+
+        .btn-follow {
+            background: linear-gradient(135deg, var(--blue-light), #d4eaff);
+            color: var(--blue-hover);
+            border: 1.5px solid #b8d8f5;
+            box-shadow: 0 2px 8px rgba(124,185,232,.15);
+        }
+
+        .btn-follow:hover {
+            background: linear-gradient(135deg, var(--blue), var(--blue-hover));
+            color: #fff;
+            border-color: var(--blue);
+            transform: translateY(-2px);
+            box-shadow: 0 6px 16px rgba(90,159,212,.3);
+        }
+
+        .btn-unfollow {
+            background: #feeaea;
+            color: #c0362c;
+            border: 1.5px solid #f5c0bd;
+        }
+
+        .btn-unfollow:hover {
+            background: linear-gradient(135deg, #e84040, #c0362c);
+            color: #fff;
+            border-color: #c0362c;
+            transform: translateY(-2px);
+            box-shadow: 0 6px 16px rgba(192,54,44,.25);
+        }
+
+        /* ─── MEDIA ─── */
+        .media-wrapper {
+            position: relative;
+            overflow: hidden;
+            background: var(--surface-alt);
+            cursor: zoom-in;
+        }
+
+        .post-img, .post-video {
+            width: 100%;
+            display: block;
+            max-height: 580px;
+            object-fit: cover;
+            transition: transform .5s cubic-bezier(.4,0,.2,1);
+        }
+
+        .media-wrapper:hover .post-img {
+            transform: scale(1.04);
+        }
+
+        /* Image overlay on hover */
+        .media-wrapper::after {
+            content: '';
+            position: absolute;
+            inset: 0;
+            background: linear-gradient(to bottom, transparent 60%, rgba(51,34,17,.18) 100%);
+            opacity: 0;
+            transition: opacity .35s ease;
+        }
+
+        .media-wrapper:hover::after { opacity: 1; }
+
+        /* ─── CAPTION ─── */
+        .caption {
+            padding: 14px 18px 8px;
+            font-size: 14.5px;
+            line-height: 1.65;
+            color: var(--ink);
+            border-left: 3px solid var(--accent-light);
+            margin: 10px 18px 2px;
+            border-radius: 0 var(--radius-sm) var(--radius-sm) 0;
+            background: linear-gradient(to right, #fffaf5, transparent);
+        }
+
+        /* ─── ACTIONS ─── */
+        .actions {
+            padding: 12px 18px 14px;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .actions-row { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
+
+        /* Shared pill button base */
+        .btn-like, .btn-share, .btn-bookmark {
+            display: inline-flex;
+            align-items: center;
+            gap: 7px;
+            padding: 8px 18px;
+            border-radius: 24px;
+            font-size: 13px;
+            font-weight: 700;
+            text-decoration: none;
+            border: 1.5px solid transparent;
+            transition: all var(--transition);
+            cursor: pointer;
+            font-family: 'DM Sans', sans-serif;
+            position: relative;
+            overflow: hidden;
+        }
+
+        /* Ripple effect on action buttons */
+        .btn-like::after, .btn-share::after, .btn-bookmark::after {
+            content: '';
+            position: absolute;
+            border-radius: 50%;
+            width: 100px; height: 100px;
+            background: rgba(255,255,255,.35);
+            transform: scale(0);
+            opacity: 0;
+            transition: transform .5s ease, opacity .4s ease;
+        }
+
+        .btn-like:active::after, .btn-share:active::after, .btn-bookmark:active::after {
+            transform: scale(3);
+            opacity: 0;
+        }
+
+        .btn-like {
+            background: #fef0f0;
+            color: #e04040;
+            border-color: #f9d0d0;
+            box-shadow: 0 2px 8px rgba(255,107,107,.1);
+        }
+
+        .btn-like:hover {
+            background: linear-gradient(135deg, #FF6B6B, #e04040);
+            color: #fff;
+            border-color: #e04040;
+            transform: translateY(-2px) scale(1.03);
+            box-shadow: 0 8px 18px rgba(224,64,64,.28);
+        }
+
+        .btn-like:active { transform: scale(.92); }
+
+        .heart-icon {
+            display: inline-block;
+            transition: transform .22s cubic-bezier(.4,0,.2,1);
+            font-size: 15px;
+        }
+
+        .btn-like:hover .heart-icon { transform: scale(1.35) rotate(-8deg); }
+
+        .btn-share {
+            background: var(--surface-alt);
+            color: var(--ink-muted);
+            border-color: var(--border);
+        }
+
+        .btn-share:hover {
+            background: linear-gradient(135deg, var(--ink), #553322);
+            color: #fff;
+            border-color: var(--ink);
+            transform: translateY(-2px) scale(1.03);
+            box-shadow: 0 8px 18px rgba(51,34,17,.2);
+        }
+
+        .btn-bookmark {
+            background: #f5f0ff;
+            color: #7b5ea7;
+            border-color: #d8ccf0;
+            margin-left: auto;
+        }
+
+        .btn-bookmark:hover {
+            background: linear-gradient(135deg, #9b7dc8, #7b5ea7);
+            color: #fff;
+            border-color: #7b5ea7;
+            transform: translateY(-2px) scale(1.03);
+            box-shadow: 0 8px 18px rgba(123,94,167,.25);
+        }
+
+        /* ─── LIKE META ─── */
+        .like-meta {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            padding: 4px 2px 0;
+        }
+
+        .like-avatars { display: flex; }
+
+        .like-avatar-mini {
+            width: 22px; height: 22px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, var(--accent-light), var(--blue-light));
+            border: 2px solid white;
+            margin-left: -6px;
+            font-size: 8px;
+            display: flex; align-items: center; justify-content: center;
+            font-weight: 700;
+            color: var(--accent-hover);
+        }
+
+        .like-avatar-mini:first-child { margin-left: 0; }
+
+        .like-count { font-size: 13px; font-weight: 700; color: var(--ink); }
+
+        .liked-users { font-size: 12px; color: var(--ink-muted); }
+
+        /* ─── DIVIDER ─── */
+        .card-divider { height: 1px; background: var(--border); margin: 0 18px; opacity: .7; }
+
+        /* ─── COMMENT BOX ─── */
+        .comment-box {
+            padding: 12px 18px;
+            transition: background var(--transition);
+        }
+
+        .comment-form { display: flex; gap: 10px; align-items: center; }
+
+        .comment-input {
+            flex: 1;
+            padding: 9px 16px;
+            font-family: 'DM Sans', sans-serif;
+            font-size: 13px;
+            background: var(--bg);
+            border: 1.5px solid var(--border) !important;
+            border-radius: 24px !important;
+            color: var(--ink);
+            outline: none;
+            transition: border-color var(--transition), box-shadow var(--transition), background var(--transition);
+        }
+
+        .comment-input::placeholder { color: var(--ink-faint); }
+
+        .comment-input:focus {
+            border-color: var(--accent) !important;
+            box-shadow: 0 0 0 4px rgba(255,179,102,.12) !important;
+            background: white;
+        }
+
+        .btn-comment {
+            padding: 9px 18px;
+            border-radius: 24px;
+            font-size: 13px;
+            font-weight: 700;
+            font-family: 'DM Sans', sans-serif;
+            background: linear-gradient(135deg, var(--accent), var(--accent-hover));
+            color: #fff;
+            border: none;
+            cursor: pointer;
+            transition: all var(--transition);
+            box-shadow: 0 4px 12px rgba(255,153,51,.25);
+            position: relative;
+            overflow: hidden;
+            white-space: nowrap;
+        }
+
+        .btn-comment::before {
+            content: '';
+            position: absolute;
+            top: 0; left: -100%;
+            width: 100%; height: 100%;
+            background: linear-gradient(120deg, transparent, rgba(255,255,255,.28), transparent);
+            transition: left .5s ease;
+        }
+
+        .btn-comment:hover {
+            background: linear-gradient(135deg, var(--accent-hover), #e07a00);
+            transform: translateY(-2px);
+            box-shadow: 0 8px 20px rgba(255,153,51,.35);
+        }
+
+        .btn-comment:hover::before { left: 100%; }
+        .btn-comment:active { transform: scale(.93); }
+
+        /* ─── COMMENTS ─── */
+        .comments-list { padding: 4px 18px 16px; display: flex; flex-direction: column; gap: 8px; }
+
+        .comment-item {
+            font-size: 13px;
+            line-height: 1.55;
+            color: var(--ink);
+            padding: 8px 12px;
+            background: var(--bg);
+            border-radius: var(--radius-sm);
+            border: 1px solid transparent;
+            transition: background var(--transition), border-color var(--transition);
+        }
+
+        .comment-item:hover {
+            background: var(--accent-light);
+            border-color: var(--border);
+        }
+
+        .comment-item strong {
+            color: var(--ink);
+            font-weight: 700;
+            margin-right: 5px;
+        }
+
+        .no-comment {
+            font-size: 12.5px;
+            color: var(--ink-faint);
+            padding: 4px 0;
+            font-style: italic;
+        }
+
+        .view-all-comments {
+            font-size: 12.5px;
+            color: var(--ink-faint);
+            cursor: pointer;
+            display: inline-flex;
+            align-items: center;
+            gap: 4px;
+            transition: color var(--transition), gap var(--transition);
+        }
+
+        .view-all-comments:hover {
+            color: var(--accent-hover);
+            gap: 8px;
+        }
+
+        /* ─── EMPTY STATE ─── */
+        .empty-state {
+            text-align: center;
+            padding: 80px 24px;
+            color: var(--ink-muted);
+            animation: cardReveal .5s ease both;
+        }
+
+        .empty-icon { font-size: 54px; margin-bottom: 18px; display: block; opacity: .55; }
+
+        .empty-state h3 {
+            font-family: 'Playfair Display', serif;
+            font-size: 24px;
+            color: var(--ink);
+            margin-bottom: 10px;
+        }
+
+        .empty-state p { font-size: 14.5px; margin-bottom: 22px; line-height: 1.6; }
+
+        .btn-primary {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            padding: 12px 28px;
+            background: linear-gradient(135deg, var(--accent), var(--accent-hover));
+            color: #fff;
+            font-weight: 700;
+            font-size: 14.5px;
+            border-radius: 28px;
+            text-decoration: none;
+            transition: all var(--transition);
+            box-shadow: 0 6px 18px rgba(255,153,51,.28);
+        }
+
+        .btn-primary:hover {
+            background: linear-gradient(135deg, var(--accent-hover), #e07a00);
+            transform: translateY(-3px);
+            box-shadow: 0 10px 28px rgba(255,153,51,.38);
+        }
+
+        /* ─── LOGOUT MODAL ─── */
+        .modal-overlay {
+            display: none;
+            position: fixed;
+            inset: 0;
+            background: rgba(26,20,16,.5);
+            backdrop-filter: blur(6px);
+            -webkit-backdrop-filter: blur(6px);
+            z-index: 200;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .modal-overlay.active { display: flex; animation: fadeIn .22s ease; }
+
+        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+
+        .modal-box {
+            background: var(--surface);
+            border-radius: var(--radius);
+            padding: 32px 30px 24px;
+            max-width: 330px;
+            width: 90%;
+            text-align: center;
+            box-shadow: var(--shadow-lg);
+            border: 1.5px solid var(--border);
+            animation: slideUp .28s cubic-bezier(.4,0,.2,1);
+        }
+
+        @keyframes slideUp {
+            from { transform: translateY(24px) scale(.96); opacity: 0; }
+            to   { transform: translateY(0) scale(1); opacity: 1; }
+        }
+
+        .modal-icon { font-size: 36px; margin-bottom: 14px; display: block; }
+        .modal-box h3 { font-family: 'Playfair Display', serif; font-size: 21px; margin-bottom: 8px; }
+        .modal-box p { font-size: 14px; color: var(--ink-muted); margin-bottom: 24px; line-height: 1.6; }
+        .modal-actions { display: flex; gap: 10px; justify-content: center; }
+
+        .btn-modal-cancel {
+            padding: 10px 22px;
+            border-radius: 22px;
+            font-size: 13.5px;
+            font-weight: 700;
+            font-family: 'DM Sans', sans-serif;
+            background: var(--bg);
+            color: var(--ink-muted);
+            border: 1.5px solid var(--border);
+            cursor: pointer;
+            transition: all var(--transition);
+        }
+
+        .btn-modal-cancel:hover {
+            background: var(--border);
+            color: var(--ink);
+            transform: translateY(-1px);
+        }
+
+        .btn-modal-confirm {
+            padding: 10px 22px;
+            border-radius: 22px;
+            font-size: 13.5px;
+            font-weight: 700;
+            font-family: 'DM Sans', sans-serif;
+            background: linear-gradient(135deg, #e84040, #c0362c);
+            color: #fff;
+            border: none;
+            cursor: pointer;
+            transition: all var(--transition);
+            box-shadow: 0 4px 12px rgba(192,54,44,.2);
+        }
+
+        .btn-modal-confirm:hover {
+            background: linear-gradient(135deg, #c0362c, #a02620);
+            transform: translateY(-2px);
+            box-shadow: 0 8px 18px rgba(192,54,44,.3);
+        }
+
+        /* ─── TOAST NOTIFICATION ─── */
+        .toast {
+            position: fixed;
+            bottom: 28px;
+            left: 50%;
+            transform: translateX(-50%) translateY(80px);
+            background: var(--ink);
+            color: #fff;
+            padding: 12px 22px;
+            border-radius: 28px;
+            font-size: 13.5px;
+            font-weight: 600;
+            box-shadow: var(--shadow-lg);
+            z-index: 300;
+            opacity: 0;
+            transition: transform .38s cubic-bezier(.4,0,.2,1), opacity .38s ease;
+            pointer-events: none;
+            white-space: nowrap;
+        }
+
+        .toast.show {
+            transform: translateX(-50%) translateY(0);
+            opacity: 1;
+        }
+
+        /* ─── RESPONSIVE ─── */
+        @media (max-width: 920px) {
+            .app-shell {
+                grid-template-columns: 1fr;
+                padding: 8px;
+            }
+            .sidebar {
+                width: 100%;
+                height: auto;
+                position: relative;
+                top: 0;
+                display: flex;
+                flex-direction: row;
+                justify-content: space-between;
+                align-items: center;
+                padding: 10px;
+            }
+            .nav-list {
+                display: flex;
+                gap: 8px;
+                flex-wrap: wrap;
+                justify-content: center;
+            }
+            .main-content { padding-top: 10px; }
+            .story-row { overflow-x: auto; }
+            .feed { margin: 0; }
+        }
+
+        @media (max-width: 520px) {
+            .story-row { padding: 8px 0; }
+            .post-img, .post-video { max-height: 300px; }
+            .btn-like, .btn-share, .btn-bookmark { padding: 6px 10px; font-size: 12px; }
+            .top-controls { flex-direction: column; align-items: flex-start; gap: 8px; }
+        }
+
+        @media (max-width: 360px) {
+            .search-input { font-size: 12px; }
+        }
+
+        /* ─── SCROLLBAR ─── */
+        ::-webkit-scrollbar { width: 5px; }
+        ::-webkit-scrollbar-track { background: var(--bg); }
+        ::-webkit-scrollbar-thumb { background: var(--accent-light); border-radius: 10px; }
+        ::-webkit-scrollbar-thumb:hover { background: var(--accent); }
+    </style>
+</head>
+
+<body>
+
+<!-- TOAST -->
+<div class="toast" id="toast"></div>
+
+<form id="logout-form" action="{% url 'logout' %}" method="POST" style="display:none;">
+    {% csrf_token %}
+</form>
+
+<!-- LOGOUT MODAL -->
+<div class="modal-overlay" id="logoutModal">
+    <div class="modal-box">
+        <span class="modal-icon">🚪</span>
+        <h3>Leaving so soon?</h3>
+        <p>Are you sure you want to log out of InstaBlog?</p>
+        <div class="modal-actions">
+            <button class="btn-modal-cancel" onclick="closeLogoutModal()">Cancel</button>
+            <button class="btn-modal-confirm" onclick="doLogout()">Log Out</button>
+        </div>
+    </div>
+</div>
+
+<div class="app-shell">
+    <aside class="sidebar">
+        <div class="logo-area">FLICKER</div>
+        <div class="nav-list">
+            <input id="searchInput" class="search-input" type="search" placeholder="Search by user, text or #hashtag" value="{{ search_query|default:'' }}" style="margin-bottom:12px;" />
+            <a href="{% url 'feed' %}" class="nav-item{% if request.path == '/feed/' %} active{% endif %}">🏠 HOME</a>
+            <a href="{% url 'reels' %}" class="nav-item{% if request.path == '/reels/' %} active{% endif %}">🎬 REELS</a>
+            <a href="{% url 'inbox' %}" class="nav-item">💬 MESSAGES</a>
+            <a href="{% url 'notifications' %}" class="nav-item">🔔 NOTIFICATIONS
+                <span class="badge">{{ notifications.unread|default:0 }}</span>
+            </a>
+            <a href="{% url 'create_post' %}" class="nav-item">➕ CREATE</a>
+            <a href="{% url 'account' %}" class="nav-item">👤 PROFILE</a>
+            <button class="nav-item" style="border:none; background:none; text-align:left;" onclick="openLogoutModal()">🚪 LOGOUT</button>
+        </div>
+    </aside>
+
+    <main class="main-content">
+        <div class="top-controls"></div>
+
+        <section class="story-row" id="storyRow">
+            <a href="{% url 'create_story' %}" class="story-item" style="min-width: 100px; font-weight:700; color: var(--ink-muted); background: var(--surface); border-radius: 12px; border: 1px dashed var(--border); display:flex; align-items:center; justify-content:center;">
+                <div>＋ Add Story</div>
+            </a>
+            {% for story in stories %}
+                <div class="story-item">
+                    <a href="{% url 'view_story' story.id %}" class="story-link" title="View {{ story.title }}">
+                        <div class="story-thumb">{{ story.title|slice:":2"|upper }}</div>
+                        <div class="story-name">{{ story.title }}</div>
+                    </a>
+                    <div class="story-add{% if story.is_highlighted %} active{% endif %}" data-story-id="{{ story.id }}" data-story-title="{{ story.title }}">★</div>
+                </div>
+            {% empty %}
+                <div class="story-item" style="padding:10px; color:var(--ink-muted);">No stories yet</div>
+            {% endfor %}
+        </section>
+
+        {% if search_query %}
+        <section class="highlights" style="padding:12px; background: var(--surface); border:1px solid var(--border); border-radius: var(--radius-sm);">
+            <strong>Search results for “{{ search_query }}”</strong>
+            {% if user_results %}
+                <div style="display:flex; flex-wrap:wrap; gap:12px; margin-top:10px;">
+                    {% for user in user_results %}
+                        <a href="{% url 'user_profile' user.id %}" class="search-card" style="border:1px solid var(--border); padding:10px 14px; border-radius:12px; background:var(--surface-alt); color: var(--ink); text-decoration:none; min-width:240px; display:flex; align-items:flex-start; gap:10px;">
+                            <img src="{{ user.profile.profile_pic.url }}" alt="{{ user.username }}" class="search-avatar" onerror="this.src='/media/default.jpg'" />
+                            <div style="flex:1; min-width:0; overflow:hidden;">
+                                <strong style="font-size:14px;">{{ user.username }}</strong>
+                                <p style="margin:4px 0 2px; font-size:12px; color:var(--ink-muted); text-overflow:ellipsis; overflow:hidden; white-space:nowrap;">{{ user.profile.bio|default:'No bio yet'|truncatechars:90 }}</p>
+                                <span style="font-size:11px; color:var(--blue-hover); font-weight:700;">View Profile →</span>
+                            </div>
+                        </a>
+                    {% endfor %}
+                </div>
+            {% else %}
+                <p style="color:var(--ink-muted); margin-top:8px;">No users found. Try another username.</p>
+            {% endif %}
+        </section>
+        {% endif %}
+
+        <section class="feed" id="feedWrapper">
+
+{% if posts %}
+    {% for post in posts %}
+    <article class="post-card">
+
+        <!-- HEADER -->
+        <div class="post-header">
+            <div class="author-info">
+                <div class="avatar">{{ post.author.username|slice:":2"|upper }}</div>
+                <div class="author-meta">
+                    <a href="{% url 'user_profile' post.author.id %}" class="author-name">
+                        {{ post.author.username }}
+                    </a>
+                    <span class="post-date">🕐 {{ post.created_at|date:"M d, Y" }}</span>
+                </div>
+            </div>
+
+            {% if user != post.author %}
+                {% if post.author.id in following_ids %}
+                    <a href="{% url 'follow_toggle' post.author.id %}" class="btn-unfollow">✖ Unfollow</a>
+                {% else %}
+                    <a href="{% url 'follow_toggle' post.author.id %}" class="btn-follow">＋ Follow</a>
+                {% endif %}
+            {% endif %}
+        </div>
+
+        <!-- MEDIA -->
+        {% if post.image or post.video %}
+        <div class="media-wrapper">
+            {% if post.image %}
+                <img src="{{ post.image.url }}" class="post-img" alt="Post by {{ post.author.username }}" loading="lazy">
+            {% endif %}
+            {% if post.video %}
+                <video controls class="post-video">
+                    <source src="{{ post.video.url }}">
+                </video>
+            {% endif %}
+        </div>
+        {% endif %}
+
+        <!-- CAPTION -->
+        {% if post.caption %}
+        <div class="caption">{{ post.caption }}</div>
+        {% endif %}
+
+        <!-- ACTIONS -->
+        <div class="actions">
+            <div class="actions-row">
+                <a href="{% url 'like_toggle' post.id %}" class="btn-like" data-post="{{ post.id }}">
+                    <span class="heart-icon">❤️</span> Like
+                </a>
+                <a href="{% url 'share_post' post.id %}" class="btn-share">
+                    📤 Share
+                </a>
+                <button class="btn-bookmark" onclick="showToast('Saved to bookmarks!')">
+                    🔖 Save
+                </button>
+            </div>
+
+            <div class="like-meta">
+                <div style="display:flex; align-items:center; gap:8px;">
+                    <div class="like-avatars">
+                        {% for like in post.like_set.all|slice:":3" %}
+                        <div class="like-avatar-mini">{{ like.user.username|slice:":1"|upper }}</div>
+                        {% endfor %}
+                    </div>
+                    <span class="like-count">{{ post.like_set.count }} likes</span>
+                </div>
+                <span class="liked-users">
+                    {% for like in post.like_set.all|slice:":3" %}
+                        {{ like.user.username }}{% if not forloop.last %}, {% endif %}
+                    {% empty %}
+                        Be the first to like this ✨
+                    {% endfor %}
+                </span>
+            </div>
+        </div>
+
+        <div class="card-divider"></div>
+
+        <!-- COMMENT FORM -->
+        <div class="comment-box">
+            <form method="POST" action="{% url 'add_comment' post.id %}" class="comment-form">
+                {% csrf_token %}
+                <input
+                    type="text"
+                    name="comment"
+                    class="comment-input"
+                    placeholder="Add a comment…"
+                    required
+                    autocomplete="off"
+                >
+                <button type="submit" class="btn-comment">Post ✈</button>
+            </form>
+        </div>
+
+        <!-- COMMENTS -->
+        <div class="comments-list">
+            {% for comment in post.comment_set.all|slice:":2" %}
+                <div class="comment-item">
+                    <strong>{{ comment.user.username }}</strong>{{ comment.text }}
+                </div>
+            {% empty %}
+                <p class="no-comment">💬 No comments yet — be the first!</p>
+            {% endfor %}
+
+            {% if post.comment_set.count > 2 %}
+                <span class="view-all-comments">View all {{ post.comment_set.count }} comments ›</span>
+            {% endif %}
+        </div>
+
+    </article>
+    {% endfor %}
+
+{% else %}
+    <div class="empty-state">
+        <span class="empty-icon">🖼️</span>
+        <h3>Nothing here yet</h3>
+        <p>Follow people or create your first post to see the feed come alive.</p>
+        <a href="{% url 'create_post' %}" class="btn-primary">✨ Create a Post</a>
+    </div>
+{% endif %}
+
+        </section>
+    </main>
+</div>
+
+<!-- Floating chat button -->
+<button id="chatToggle" class="floating-chat-btn" title="Open messages">💬</button>
+
+<!-- JS -->
+<script>
+    /* Logout modal */
+    function openLogoutModal() {
+        document.getElementById('logoutModal').classList.add('active');
+    }
+    function closeLogoutModal() {
+        document.getElementById('logoutModal').classList.remove('active');
+    }
+    function doLogout() {
+        document.getElementById('logout-form')?.submit();
+    }
+
+    document.getElementById('logoutModal')?.addEventListener('click', function(e) {
+        if (e.target === this) closeLogoutModal();
+    });
+
+    document.addEventListener('keydown', e => {
+        if (e.key === 'Escape') closeLogoutModal();
+    });
+
+    /* Like button bounce + color feedback */
+    document.querySelectorAll('.btn-like').forEach(btn => {
+        btn.addEventListener('click', function(e) {
+            const heart = this.querySelector('.heart-icon');
+            if (!heart) return;
+            heart.style.transform = 'scale(1.7) rotate(-10deg)';
+            heart.style.filter = 'drop-shadow(0 0 6px rgba(255,80,80,.6))';
+            setTimeout(() => {
+                heart.style.transform = '';
+                heart.style.filter = '';
+            }, 320);
+        });
+    });
+
+    /* Comment input background tint on focus */
+    document.querySelectorAll('.comment-input').forEach(input => {
+        input.addEventListener('focus', function() {
+            this.closest('.comment-box').style.background = 'var(--accent-light)';
+        });
+        input.addEventListener('blur', function() {
+            this.closest('.comment-box').style.background = '';
+        });
+    });
+
+    function showToast(msg) {
+        const toast = document.getElementById('toast');
+        toast.textContent = msg;
+        toast.classList.add('show');
+        setTimeout(() => toast.classList.remove('show'), 2600);
+    }
+
+    document.querySelectorAll('.btn-share').forEach(btn => {
+        btn.addEventListener('click', function(e) {
+            if (navigator.share) return;
+            e.preventDefault();
+            showToast('📤 Link copied to clipboard!');
+        });
+    });
+
+    /* Search handling + hashtag filter */
+    const searchInput = document.getElementById('searchInput');
+    if (searchInput) {
+        searchInput.addEventListener('keyup', e => {
+            if (e.key === 'Enter') {
+                const q = searchInput.value.trim();
+                const params = new URLSearchParams(window.location.search);
+                if (q) {
+                    params.set('q', q);
+                } else {
+                    params.delete('q');
+                }
+                window.location.search = params.toString();
+            }
+        });
+    }
+
+    /* Hashtag conversion for captions */
+    document.querySelectorAll('.caption').forEach(node => {
+        const text = node.textContent || '';
+        const html = text.replace(/#([\w]+)/g, '<a href="?hashtag=$1" style="color: var(--blue-hover); font-weight:700;">#$1</a>');
+        node.innerHTML = html;
+    });
+
+    document.addEventListener('click', function(e) {
+        const target = e.target;
+        if (target.matches('.story-add')) {
+            const storyId = target.dataset.storyId;
+            if (storyId) {
+                window.location.href = `/story/toggle/${storyId}/`;
+            }
+        }
+    });
+
+    function updateLocalHighlights() {
+        const profileList = document.getElementById('profileHighlightsList');
+        const sidebarList = document.getElementById('sidebarHighlightsList');
+        [profileList, sidebarList].forEach(container => {
+            if (!container) return;
+            if (container.children.length === 0) {
+                container.innerHTML = '<span style="font-size:13px;color:var(--ink-muted)">No highlights yet.</span>';
+            }
+        });
+    }
+
+    updateLocalHighlights();
+
+    const chatToggle = document.getElementById('chatToggle');
+    const chatPanel = document.getElementById('chatPanel');
+    const chatInput = document.getElementById('chatInput');
+    const chatBody = document.getElementById('chatBody');
+
+    if (chatToggle) {
+        chatToggle.addEventListener('click', () => {
+            // Redirect to the inbox/messages section when chat toggle is clicked
+            window.location.href = "{% url 'inbox' %}";
+        });
+    }
+
+    const addChatMessage = (message, fromSelf = true) => {
+        if (!chatBody) return;
+        const p = document.createElement('p');
+        p.textContent = (fromSelf ? 'You: ' : 'Friend: ') + message;
+        chatBody.appendChild(p);
+        chatBody.scrollTop = chatBody.scrollHeight;
+    };
+
+    document.getElementById('chatSend')?.addEventListener('click', () => {
+        const value = chatInput && chatInput.value.trim();
+        if (!value) return;
+        addChatMessage(value, true);
+        if (chatInput) chatInput.value = '';
+    });
+</script>
+
+</body>
+</html>

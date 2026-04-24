@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Notifications</title>
+    <style>
+        body{font-family:'DM Sans',sans-serif;background:#FFFBF7;color:#332211;}
+        .container{max-width:700px;margin:20px auto;padding:16px;}
+        .panel{background:#fff;border:1px solid #FFE6CC;border-radius:14px;padding:18px;box-shadow:0 5px 16px rgba(255,153,51,.12);}
+        .item{border-bottom:1px solid #FFE6CC;padding:10px 0;display:flex;justify-content:space-between;align-items:center;}
+        .item:last-child{border:none;}
+        .unread{font-weight:700;color:#c0362c;}
+        .btn{padding:6px 12px;border-radius:8px;border:none;background:linear-gradient(135deg,#FFB366,#FF9933);color:#fff;text-decoration:none;}
+    </style>
+</head>
+<body>
+<div class="container">
+    <h1>Notifications</h1>
+    <div class="panel">
+        {% for notif in notifications %}
+            <div class="item">
+                <div><span class="{% if not notif.is_read %}unread{% endif %}">{{ notif.message }}</span><br>
+                    <small>{{ notif.created_at|timesince }} ago</small>
+                </div>
+                {% if not notif.is_read %}
+                    <a href="{% url 'mark_notification_read' notif.id %}" class="btn">Mark as read</a>
+                {% else %}
+                    <span style="color:#77553A">Read</span>
+                {% endif %}
+            </div>
+        {% empty %}
+            <p>No notifications yet.</p>
+        {% endfor %}
+    </div>
+    <p><a class="btn" style="margin-top:12px; display:inline-block;" href="{% url 'feed' %}">← Back to Feed</a></p>
+</div>
+</body>
+</html>

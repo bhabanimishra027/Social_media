@@ -1,0 +1,123 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Register</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { 
+            font-family: 'Segoe UI', sans-serif; 
+            background: linear-gradient(135deg, #FFFBF7 0%, #FFF5E6 100%); 
+            display: flex; 
+            justify-content: center; 
+            align-items: center; 
+            min-height: 100vh;
+            padding: 20px;
+        }
+        .register-card { 
+            background: white; 
+            padding: 40px; 
+            border-radius: 15px; 
+            box-shadow: 0 8px 24px rgba(255, 179, 102, 0.15);
+            max-width: 400px; 
+            width: 100%;
+            border: 2px solid #FFD9B3;
+        }
+        h1 { 
+            text-align: center; 
+            margin-bottom: 30px; 
+            color: #332211;
+            font-size: 28px;
+        }
+        form { display: flex; flex-direction: column; }
+        input { 
+            padding: 12px; 
+            margin: 10px 0; 
+            border: 2px solid #FFD9B3; 
+            border-radius: 8px; 
+            font-size: 14px;
+            transition: border-color 0.3s ease;
+        }
+        input:focus {
+            outline: none;
+            border-color: #FFB366;
+            box-shadow: 0 0 0 3px rgba(255, 179, 102, 0.1);
+        }
+        button { 
+            background: linear-gradient(135deg, #FFB366 0%, #FF9933 100%); 
+            color: white; 
+            padding: 12px; 
+            border: none; 
+            border-radius: 8px; 
+            cursor: pointer; 
+            font-size: 16px; 
+            margin-top: 15px; 
+            font-weight: bold;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 12px rgba(255, 179, 102, 0.3);
+        }
+        button:hover { 
+            transform: translateY(-2px);
+            box-shadow: 0 6px 16px rgba(255, 179, 102, 0.4);
+        }
+        .error { 
+            color: #EE5A52; 
+            padding: 10px; 
+            margin-bottom: 15px; 
+            background: #FFF5E6; 
+            border-radius: 8px;
+            border-left: 4px solid #FF6B6B;
+        }
+        .success { 
+            color: #2ECC71; 
+            padding: 10px; 
+            margin-bottom: 15px; 
+            background: #F0FFF4; 
+            border-radius: 8px;
+            border-left: 4px solid #2ECC71;
+        }
+        .link { 
+            text-align: center; 
+            margin-top: 20px; 
+        }
+        .link a { 
+            color: #FFB366; 
+            text-decoration: none;
+            font-weight: 600;
+            transition: color 0.3s ease;
+        }
+        .link a:hover { 
+            color: #FF9933;
+        }
+        .messages { margin-bottom: 20px; }
+        .messages .error, .messages .success { padding: 10px; margin-bottom: 10px; border-radius: 8px; }
+    </style>
+</head>
+<body>
+
+<div class="register-card">
+    <h1>✨ Create Account</h1>
+
+    {% if messages %}
+        <div class="messages">
+            {% for message in messages %}
+                <div class="{% if message.tags %}{{ message.tags }}{% endif %}">{{ message }}</div>
+            {% endfor %}
+        </div>
+    {% endif %}
+
+    <form method="POST">
+        {% csrf_token %}
+        <input type="text" name="username" placeholder="Username" required>
+        <input type="email" name="email" placeholder="Email" required>
+        <input type="password" name="password" placeholder="Password" required>
+        <input type="password" name="password_confirm" placeholder="Confirm Password" required>
+        <button type="submit">🚀 Create Account</button>
+    </form>
+
+    <div class="link">
+        Already have an account? <a href="{% url 'login' %}">Login here</a>
+    </div>
+</div>
+
+</body>
+</html>

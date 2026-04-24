@@ -1,0 +1,296 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Chat</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { 
+            font-family: 'Segoe UI', sans-serif;
+            background: linear-gradient(135deg, #FFFBF7 0%, #FFF5E6 100%);
+            min-height: 100vh;
+        }
+
+        .chat-container {
+            max-width: 600px;
+            margin: 20px auto;
+            background: white;
+            border-radius: 15px;
+            border: 2px solid #FFD9B3;
+            box-shadow: 0 8px 24px rgba(255, 179, 102, 0.15);
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+            height: 600px;
+        }
+
+        .chat-header {
+            padding: 15px 20px;
+            background: linear-gradient(135deg, #FFB366 0%, #FF9933 100%);
+            color: white;
+            border-bottom: 2px solid #FF9933;
+        }
+
+        .chat-header h3 {
+            font-size: 18px;
+            font-weight: 600;
+        }
+
+        .chat-box {
+            flex: 1;
+            overflow-y: auto;
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+
+        .msg {
+            padding: 10px 15px;
+            margin: 5px 0;
+            border-radius: 10px;
+            max-width: 70%;
+            word-wrap: break-word;
+            font-size: 14px;
+        }
+
+        .sent {
+            background: linear-gradient(135deg, #FFB366 0%, #FF9933 100%);
+            color: white;
+            margin-left: auto;
+            text-align: right;
+            border-bottom-right-radius: 2px;
+        }
+
+        .received {
+            background: #FFF5E6;
+            color: #332211;
+            border: 2px solid #FFE6CC;
+            border-bottom-left-radius: 2px;
+        }
+
+        img {
+            max-width: 100%;
+            border-radius: 10px;
+            margin-top: 8px;
+        }
+
+        .seen {
+            font-size: 11px;
+            color: #77553A;
+            margin-top: 4px;
+        }
+
+        .typing {
+            font-size: 13px;
+            color: #FFB366;
+            font-weight: 600;
+            margin-left: 10px;
+            font-style: italic;
+        }
+
+        .chat-footer {
+            padding: 15px 20px;
+            background: #FFF5E6;
+            border-top: 2px solid #FFD9B3;
+            display: flex;
+            gap: 8px;
+            align-items: flex-end;
+        }
+
+        #message-input {
+            flex: 1;
+            padding: 10px 15px;
+            border: 2px solid #FFD9B3;
+            border-radius: 8px;
+            font-family: 'Segoe UI', sans-serif;
+            font-size: 14px;
+            transition: border-color 0.3s ease;
+        }
+
+        #message-input:focus {
+            outline: none;
+            border-color: #FFB366;
+            box-shadow: 0 0 0 3px rgba(255, 179, 102, 0.1);
+        }
+
+        input[type="file"] {
+            padding: 8px;
+            border: 2px solid #FFD9B3;
+            border-radius: 8px;
+        }
+
+        button {
+            padding: 10px 20px;
+            background: linear-gradient(135deg, #FFB366 0%, #FF9933 100%);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: 600;
+            font-size: 14px;
+            transition: all 0.3s ease;
+            box-shadow: 0 2px 8px rgba(255, 179, 102, 0.2);
+        }
+
+        button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(255, 179, 102, 0.3);
+        }
+
+        button:active {
+            transform: translateY(0);
+        }
+
+        .post-preview {
+            border: 2px solid #FFD9B3;
+            padding: 10px;
+            margin-top: 8px;
+            border-radius: 8px;
+            background: #FFF5E6;
+        }
+
+        .post-preview small {
+            color: #77553A;
+        }
+
+        #typing-status {
+            height: 20px;
+        }
+    </style>
+</head>
+
+<body>
+
+<div class="chat-container">
+    <div class="chat-header">
+        <h3>💬 Chat with {{ other_user.username }}</h3>
+    </div>
+
+    <div class="chat-box" id="chat-box">
+
+    {% for msg in messages %}
+        <div class="msg {% if msg.sender == user %}sent{% else %}received{% endif %}">
+            
+            {% if msg.text %}
+                {{ msg.text }}
+            {% endif %}
+            {% if msg.post %}
+                <a href="{% url 'view_post' msg.post.id %}" style="text-decoration:none; color:inherit;">
+                    <div class="post-preview">
+
+                        {% if msg.post.image %}
+                            <img src="{{ msg.post.image.url }}" style="width:100%;">
+                        {% endif %}
+
+                        <p><strong>{{ msg.post.caption }}</strong></p>
+                        <small>👆 Tap to view post</small>
+
+                    </div>
+                </a>
+            {% endif %}
+
+            {% if msg.image %}
+                <br>
+                <img src="{{ msg.image.url }}">
+            {% endif %}
+
+            {% if msg.sender == user %}
+                <div class="seen">
+                    {% if msg.seen %}✔✔ Seen{% else %}✔ Sent{% endif %}
+                </div>
+            {% endif %}
+
+        </div>
+    {% endfor %}
+
+    </div>
+</div>
+
+<!-- ⌨️ Typing indicator -->
+<div style="max-width:600px; margin:10px auto; padding:0 20px;">
+    <p id="typing-status" class="typing"></p>
+</div>
+
+<div style="max-width:600px; margin:20px auto; padding:0 20px; margin-bottom:40px;">
+    <form method="POST" enctype="multipart/form-data" style="display:flex; gap:8px; flex-wrap:wrap;">
+        {% csrf_token %}
+        <input type="text" name="message" id="message-input" placeholder="Type a message..." style="flex:1; min-width:200px;">
+        <input type="file" name="image" style="flex:1; min-width:150px;">
+        <button type="button" onclick="sendMessage()" style="min-width:100px;">📤 Send</button>
+    </form>
+</div>
+
+<script>
+const userId = "{{ other_user.id }}";
+const socket = new WebSocket(
+    "ws://" + window.location.host + "/ws/chat/" + userId + "/"
+);
+
+const chatBox = document.getElementById("chat-box");
+const input = document.getElementById("message-input");
+const typingStatus = document.getElementById("typing-status");
+
+// RECEIVE MESSAGE
+socket.onmessage = function(e) {
+    const data = JSON.parse(e.data);
+
+    // 🟢 ONLINE STATUS
+    if (data.online) {
+        typingStatus.innerText = data.user + " is online 🟢";
+        return;
+    }
+
+    // ⌨️ TYPING
+    if (data.typing) {
+        typingStatus.innerText = data.user + " is typing...";
+        return;
+    }
+
+    // CLEAR STATUS
+    typingStatus.innerText = "";
+
+    // 💬 MESSAGE
+    if (data.message) {
+        const msg = document.createElement("div");
+        msg.className = "msg received";
+        msg.innerText = data.user + ": " + data.message;
+
+        chatBox.appendChild(msg);
+        chatBox.scrollTop = chatBox.scrollHeight;
+    }
+};
+
+
+// SEND MESSAGE
+function sendMessage(){
+    const message = input.value;
+
+    socket.send(JSON.stringify({
+        "message": message
+    }));
+
+    const msg = document.createElement("div");
+    msg.className = "msg sent";
+    msg.innerText = "You: " + message;
+
+    chatBox.appendChild(msg);
+    input.value = "";
+}
+
+// TYPING INDICATOR
+input.addEventListener("input", () => {
+    socket.send(JSON.stringify({
+        "typing": true
+    }));
+});
+if (data.post_id) {
+    const postDiv = document.createElement("div");
+    postDiv.className = "msg received";
+    postDiv.innerText = "📸 Shared Post ID: " + data.post_id;
+
+    chatBox.appendChild(postDiv);
+}
+</script>
+
+</body>
+</html>
