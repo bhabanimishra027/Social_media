@@ -34,21 +34,13 @@ A fully functional social media web application built using Django. This platfor
     core/
       db.sqlite3
       manage.py
-      
       media/
-      
         posts/
-        
-          images/
-          
+          images/ 
         stories/
-        
           images/
-          
           videos/
-          
       blog/
-      
         __init__.py
         admin.py
         apps.py
@@ -59,7 +51,6 @@ A fully functional social media web application built using Django. This platfor
         tests.py
         urls.py
         views.py
-        
       core/
         __init__.py
         asgi.py
